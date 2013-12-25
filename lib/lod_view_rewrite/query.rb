@@ -16,10 +16,10 @@ module LodViewRewrite
     attr_reader :row, :structured
     # attr_accessor :filters
 
-    def prefixes; @structured['prefixes']; end
-    def options; @structured['options']; end
-    def patterns; @structured['patterns']; end
-    def operators; @structured['operators']; end
+    def prefixes; @structured['prefixes'] || []; end
+    def options; @structured['options'] || []; end
+    def patterns; @structured['patterns'] || []; end
+    def operators; @structured['operators'] || []; end
     # def filters; @structured['filters']; end
 
     def parse
@@ -99,19 +99,25 @@ module LodViewRewrite
 
     # filter, projection
 
-    def to_sparql( filters = "" )
+    def to_sparql( filters = [] )
       # operators, options, patterns, prefixes, and filters
       sparql = ''
 
       ## PREFIX
       # sparql << prefixes.map { |prefix,uri| "PREFIX #{prefix} <#{uri}>" }.join( "\n" )
 
-      sparql << "\n"
+      # sparql << "\n"
 
       ## options
 
       ## Operators
-      operators.each { |type,vars| sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" }
+      if operators.empty?
+        sparql << "SELECT *"
+      else
+        operators.each do |type,vars|
+          sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" if type
+        end
+      end
 
       ## Patterns: WHERE Closure
       sparql << "\nWHERE {\n"
@@ -126,7 +132,34 @@ module LodViewRewrite
       ## Operator: Order By
       ## Operator: Group By, Having
 
+      sparql << "LIMIT 1000"
       sparql
+    end
+
+    def exec_sparql( filter = [] )
+      sparql = to_sparql( filter )
+
+      uri = "http://dbpedia.org/sparql" # !!
+
+      # About request format
+      # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
+
+      params = {
+        'default-uri-graph' => "http://dbpedia.org", # !!
+        'query' => to_sparql( filter ),
+        'format' => 'application/json', # 'text/html'
+        # 'timeout' => '30000',
+        # 'debug' => 'on',
+      }
+
+      response = RestClient.get( uri, :params => params )
+
+      case response.code
+      when 200
+        return response.to_str
+      else
+        throw UnExpectedReturnCode
+      end
     end
 
     # def build_operator_query
