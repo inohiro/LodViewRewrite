@@ -18,8 +18,8 @@ module LodViewRewrite
 
     def prefixes; @structured['prefixes']; end
     def options; @structured['options']; end
-    def patterns; @structures['patterns']; end
-    def operators; @structures['operators']; end
+    def patterns; @structured['patterns']; end
+    def operators; @structured['operators']; end
     # def filters; @structured['filters']; end
 
     def parse
@@ -45,7 +45,9 @@ module LodViewRewrite
     private :parse
 
     def parse_prefixes( prefixes )
-      @structured.store( 'prefixes', prefixes.map { |prefix| { prefix[0].to_s => prefix[1].to_s } } )
+      prefix_h = {}
+      prefixes.each { |prefix| prefix_h.store( prefix[0].to_s, prefix[1].to_s ) }
+      @structured.store( 'prefixes', prefix_h )
     end
     private :parse_prefixes
 
@@ -55,7 +57,7 @@ module LodViewRewrite
 
       case tree
       when SPARQL::Algebra::Operator::Project
-        operators.store( 'project', tree.operands[0].map { |op| op.to_s } )
+        operators.store( 'select', tree.operands[0].map(&:to_s))
       else
         raise UnsupportedOperatorException, "#{tree}"
       end
@@ -65,7 +67,7 @@ module LodViewRewrite
     private :parse_operator
 
     def parse_patterns( patterns )
-      @structured.store( 'patterns', patterns.map { |pattern| pattern.to_s } )
+      @structured.store( 'patterns', patterns.map(&:to_s) )
     end
     private :parse_patterns
 
@@ -95,16 +97,55 @@ module LodViewRewrite
       @structured.to_json
     end
 
+    # filter, projection
+
     def to_sparql( filters = "" )
       # operators, options, patterns, prefixes, and filters
       sparql = ''
-      @structured['prefixes'].each do |prefix|
-        sparql << prefix.map { |k,v| "PREFIX #{k} <#{v}>" }.join( "\n" )
+
+      ## PREFIX
+      # sparql << prefixes.map { |prefix,uri| "PREFIX #{prefix} <#{uri}>" }.join( "\n" )
+
+      sparql << "\n"
+
+      ## options
+
+      ## Operator: SELECT Closure
+      operators.each do
       end
 
-      @structured['operators']
+      operators.each do |type,vars|
+        sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}"
+      end
+
+      ## Patterns: WHERE Closure
+      sparql << "\nWHERE {\n"
+      # sparql << patterns.join( "\n" )
+      patterns.each { |pattern| sparql << "  #{pattern}\n" }
+
+      ## FILTERs
+      # sparql << filters.to_s
+      filters.to_a.each { |filter| sparql << "  #{filter}\n" }
+
+      sparql << "}"
+
+      ## Operator: Order By
+      ## Operator: Group By
+      ## Operator: Having
+
       sparql
     end
+
+    # def build_operator_query
+    #   @structured['operators'].each do |operator|
+    #     operator.each do |type,vars|
+    #       case type
+    #       when 'project'
+    #       else
+    #       end
+    #     end
+    #   end
+    # end
 
   end
 end

@@ -15,9 +15,15 @@ module LodViewRewrite
       @loaded = JSON.load( @json )
     end
 
+    def to_a
+      build_filter_from_condition_set
+    end
+
+=begin
     def to_s
       build_filter_from_condition_set.join( "\n" )
     end
+=end
 
     # condition format:
     #   a condition is noted as a Hash.
@@ -47,9 +53,9 @@ module LodViewRewrite
         filter << ", \"#{condition['flag']}\"" if condition['flag']
         filter << " )"
       when 'exists'
-        filter << "EXISTS ( #{condition['subject']} #{condition['predicate']} #{condition['object']} )"
+        filter << "EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
       when 'not_exists'
-        filter << "NOT EXISTS ( #{condition['subject']} #{condition['predicate']} #{condition['object']} )"
+        filter << "NOT EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
       when 'normal'
         filter << "( #{hatenize( condition['var'] )} #{condition['operator']} #{condition['condition']} )"
       else
