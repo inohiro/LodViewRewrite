@@ -110,13 +110,8 @@ module LodViewRewrite
 
       ## options
 
-      ## Operator: SELECT Closure
-      operators.each do
-      end
-
-      operators.each do |type,vars|
-        sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}"
-      end
+      ## Operators
+      operators.each { |type,vars| sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" }
 
       ## Patterns: WHERE Closure
       sparql << "\nWHERE {\n"
@@ -124,14 +119,12 @@ module LodViewRewrite
       patterns.each { |pattern| sparql << "  #{pattern}\n" }
 
       ## FILTERs
-      # sparql << filters.to_s
       filters.to_a.each { |filter| sparql << "  #{filter}\n" }
 
       sparql << "}"
 
       ## Operator: Order By
-      ## Operator: Group By
-      ## Operator: Having
+      ## Operator: Group By, Having
 
       sparql
     end
