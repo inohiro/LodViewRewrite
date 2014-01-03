@@ -75,7 +75,13 @@ module LodViewRewrite
       when '2'
         filter << "NOT EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
       when '3'
-        filter << "( #{hatenize( condition['var'] )} #{condition['operator']} #{condition['condition']} )"
+        if condition['ConditionType'] == "System.String" || condition['ConditionType'] == "string"
+          filter << "(str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
+        elsif condition['ConditionType'] == "System.Int32" # integer
+          filter << "(#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
+        else
+          raise UnknownConditionDataType
+        end
       else
         raise UnknownFilterConditionType
       end
@@ -85,7 +91,7 @@ module LodViewRewrite
 
     def build_conditions
       if @loaded.class == Array
-        @loaded.map { |condition| build_filter_from_condition( condition ) }
+        # @loaded.map { |condition| build_filter_from_condition( condition ) }
         @loaded.each do |condition|
           if condition.key?( "FilterType" )
             @filters << build_filter_from_condition( condition )
@@ -104,10 +110,10 @@ module LodViewRewrite
 
       case condition['SelectionType']
       when '0' # SingleSelection
-        select << "#{hatenize(condition["Variable"])} "
+        select << "#{hatenize(condition["Variable"])}"
       when '1' # MultipleSelection
-        conditions["Variables"].each do |var|
-          select << "#{hatenize( var["Variable"])} " if var["FilterType"] == '4'
+        condition["Variables"].each do |var|
+          select << "#{hatenize( var["Variable"])} " if var["SelectionType"] == '0' # SingleSelection
         end
         select.strip!
       when '2' # All
@@ -115,7 +121,7 @@ module LodViewRewrite
       else
         raise UnknownFilterConditionType
       end
-      select << '\n'
+      select << "\n"
     end
 
     def build_aggregation_from_condition( condition )
@@ -124,26 +130,30 @@ module LodViewRewrite
 
       case condition['AggregationType']
       when '0' # Min
-        select << "(MIN(#{hatenize(variable)}) AS #{hatenize(variable, '?min_')})"
+        select << "(MIN(#{hatenize(variable)}) AS #{hatenize(variable, 'min_')})"
       when '1' # Max
-        select << "(MAX(#{hatenize(variable)}) AS #{hatenize(variable, '?max_')})"
+        select << "(MAX(#{hatenize(variable)}) AS #{hatenize(variable, 'max_')})"
       when '2' # Sum
-        select << "(SUM(#{hatenize(variable)}) AS #{hatenize(variable, '?sum_')})"
+        select << "(SUM(#{hatenize(variable)}) AS #{hatenize(variable, 'sum_')})"
       when '3' # Count
-        select << "(COUNT(#{hatenize(variable)}) AS #{hatenize(variable, '?count_')})"
+        select << "(COUNT(#{hatenize(variable)}) AS #{hatenize(variable, 'count_')})"
       when '4' # Average
-        select << "(AVG(#{hatenize(variable)}) AS #{hatenize(variable, '?avg_')})"
+        select << "(AVG(#{hatenize(variable)}) AS #{hatenize(variable, 'avg_')})"
       else
         raise UnkwnownAggregationType
       end
-      select.strip << '\n'
+      select.strip << "\n"
     end
 
     def hatenize( variable, prefix = '' )
-      chars = variable.split( // )
-      chars.unshift( prefix) if prefix != ''
-      chars.unshift( '?' ) if chars.first != '?'
-      chars.join
+      if variable
+        chars = variable.split( // )
+        chars.unshift( prefix) if prefix != ''
+        chars.unshift( '?' ) if chars.first != '?'
+        chars.join
+      else
+        raise InvalidArgumentException
+      end
     end
 
   end
