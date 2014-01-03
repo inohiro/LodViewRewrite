@@ -5,8 +5,11 @@ require 'pp'
 require 'sparql'
 require 'rest_client'
 
+require 'lod_view_rewrite/version.rb'
 require 'lod_view_rewrite/query.rb'
 require 'lod_view_rewrite/filters.rb'
+require 'lod_view_rewrite/aggregation.rb'
+require 'lod_view_rewrite/condition.rb'
 
 module LodViewRewrite
 
