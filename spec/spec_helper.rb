@@ -3,7 +3,7 @@
 require 'rspec'
 require 'rspec/autorun'
 
-require 'lod_view_rewrite.rb'
+require 'LodViewRewrite'
 require 'pp'
 
 RSpec.configure do |config|

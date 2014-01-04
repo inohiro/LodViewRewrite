@@ -6,6 +6,7 @@ module LodViewRewrite
 
     def initialize( sparql = '' )
       @raw = sparql
+      @http = Net::HTTP::Persistent.new
       @structured = Hash.new
       # @structured.store( 'filters', [] )
       unless sparql == ''
@@ -139,7 +140,7 @@ module LodViewRewrite
     def exec_sparql( filter = [] )
       sparql = to_sparql( filter )
 
-      uri = "http://dbpedia.org/sparql" # !!
+      uri = URI "http://dbpedia.org/sparql" # !!
 
       # About request format
       # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
@@ -152,11 +153,14 @@ module LodViewRewrite
         # 'debug' => 'on',
       }
 
-      response = RestClient.get( uri, :params => params )
+      # response = RestClient.get( uri, :params => params )
 
-      case response.code
-      when 200
-        return response.to_str
+      uri.query = URI.encode_www_form( params )
+      response = @http.request uri
+
+      case response
+      when Net::HTTPOK
+        return response.body
       else
         throw UnExpectedReturnCode
       end
