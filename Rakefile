@@ -1,5 +1,6 @@
 # coding: utf-8
 
+require 'bundler'
 require 'rubygems'
 require 'rake'
 $:.unshift File.join( File.dirname(__FILE__), 'lib' )
@@ -11,3 +12,5 @@ task :default => :spec
 
 desc "Run all specs in spec directory"
 RSpec::Core::RakeTask.new(:spec)
+
+Bundler::GemHelper.install_tasks
