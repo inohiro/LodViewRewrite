@@ -104,9 +104,9 @@ describe LodViewRewrite::Condition do
       end
     end
 
-    context 'SingleSelection with condition' do
+    context 'SingleSelection with numerical condition' do
       before :each do
-        cond = [ {"SelectionType"=>"0", "Variable"=>"age", "Operator"=>"=", "Condition"=>"30"} ]
+        cond = [ {"SelectionType"=>"0", "Variable"=>"age", "Operator"=>"=", "Condition"=>"30", "ConditionType"=>"System.Int32"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -117,7 +117,21 @@ describe LodViewRewrite::Condition do
       it 'can parse filter condition' do
         @conditions.filters.should eq [ "FILTER (?age = 30)" ]
       end
+    end
 
+    context 'SingleSelection with string condition' do
+      before :each do
+        cond = [ {"SelectionType"=>"0", "Variable"=>"name", "Operator"=>"=", "Condition"=>"inohiro", "ConditionType"=>"System.String"} ]
+        @conditions = LodViewRewrite::Condition.new( cond.to_json )
+      end
+
+      it 'can parse SingleSelection condition' do
+        @conditions.select.should eq "SELECT ?name\n"
+      end
+
+      it 'can parse filter condition' do
+        @conditions.filters.should eq [ "FILTER (str(?name) = \"inohiro\")" ]
+      end
     end
 
     context 'MultipleSelection' do
