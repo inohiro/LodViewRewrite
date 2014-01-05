@@ -204,9 +204,10 @@ EOQ
 
       it 'can execute to DBpedia.org' do
         expected_var_name = /count_subject/
-        expected_result = /1/
-        expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected_var_name )
-        expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected_result )
+        expected_count = /1/
+        result = JSON.parse( @query.exec_sparql( conditions ) ).to_s
+        expect( result ).to match( expected_var_name )
+        expect( result ).to match( expected_count )
       end
     end
   end

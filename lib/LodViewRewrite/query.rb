@@ -119,7 +119,10 @@ module LodViewRewrite
       ## options
 
       ## Operators
-      if condition.select == ""
+
+      if condition.select != ""
+        sparql = condition.select # inject condition
+      else
         if operators.empty?
           sparql << "SELECT *"
         else
@@ -127,8 +130,6 @@ module LodViewRewrite
             sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" if type
           end
         end
-      else # inject condition
-        sparql << condition.select
       end
 
       ## Patterns: WHERE Closure
@@ -153,9 +154,10 @@ module LodViewRewrite
       # About request format
       # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
 
+      sparql = to_sparql( condition )
       params = {
         'default-uri-graph' => "http://dbpedia.org", # !!
-        'query' => to_sparql( condition ),
+        'query' => sparql,
         'format' => 'application/json', # 'text/html'
         # 'timeout' => '30000',
         # 'debug' => 'on',
@@ -170,6 +172,7 @@ module LodViewRewrite
       when Net::HTTPOK
         return response.body
       else
+        puts "QUERY: #{sparql}"
         throw UnExpectedReturnCode
       end
     end
