@@ -11,25 +11,11 @@ module LodViewRewrite
       @http = Net::HTTP::Persistent.new
       @structured = Hash.new
       @limit = limit
-      @response_format = set_response_format( response_format )
+      @response_format = Utility.set_response_format( response_format )
       unless sparql == ''
         @structured = parse
       end
     end
-
-    def set_response_format( id )
-      case id
-      when :js
-        'application/json'
-      when :tsv
-        'text/tab-separated-values'
-      when :csv
-        'text/csv'
-      else
-        'application/json'
-      end
-    end
-    private :set_response_format
 
     attr_reader :row, :structured
     # attr_accessor :filters

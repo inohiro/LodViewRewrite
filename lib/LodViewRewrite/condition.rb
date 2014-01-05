@@ -5,12 +5,13 @@ module LodViewRewrite
 
     attr_reader :filters, :select
 
-    def initialize( json = '' )
+    def initialize( json = '', response_format = :js )
       unless json == ''
         @json = json
         @loaded = ''
         @filters = []
         @select = ''
+        @response_format = Utility.set_response_format( response_format )
         parse
       end
     end

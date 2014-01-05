@@ -7,6 +7,7 @@ require 'net/http/persistent'
 require 'LodViewRewrite/version.rb'
 require 'LodViewRewrite/query.rb'
 require 'LodViewRewrite/condition.rb'
+require 'LodViewRewrite/utility.rb'
 
 module LodViewRewrite
   # Your code goes here...
