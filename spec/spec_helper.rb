@@ -3,6 +3,10 @@
 require 'rspec'
 require 'rspec/autorun'
 
+# require 'LodViewRewrite'
+# require '../lib/LodViewRewrite.rb'
+$LOAD_PATH << File.dirname(__FILE__) + '/../lib/'
+
 require 'LodViewRewrite'
 require 'pp'
 

@@ -4,11 +4,13 @@ module LodViewRewrite
 
   class Query
 
-    def initialize( sparql = '' )
+    attr_reader :limit
+
+    def initialize( sparql = '', limit = 1000 )
       @raw = sparql
       @http = Net::HTTP::Persistent.new
       @structured = Hash.new
-      # @structured.store( 'filters', [] )
+      @limit = limit
       unless sparql == ''
         @structured = parse
       end
@@ -26,19 +28,24 @@ module LodViewRewrite
     def parse
       parsed = SPARQL.parse( @raw )
       prefixes_enable = false
-      if parsed.operands.size == 2
-        prefixes_enable = true
-      elsif parsed.operands.size == 1
+
+      if parsed.is_a? RDF::Query
         prefixes_enable = false
-      else
-        raise UnknownQueryStructureException, 'parsed.operator has more than 2 operands'
+      elsif parsed.is_a? SPARQL::Algebra::Operator::Prefix
+        if parsed.operands.size == 2
+          prefixes_enable = true
+        elsif parsed.operands.size == 1
+          prefixes_enable = false
+        else
+          raise UnknownQueryStructureException, 'parsed.operator has more than 2 operands'
+        end
       end
 
       if prefixes_enable
         parse_prefixes( parsed.operands[0] )
         @structured = parse_tree( parsed.operands[1] )
       else
-        @structured = parse_tree( parsed.operands[0] )
+        @structured = parse_tree( parsed )
       end
 
       @structured
@@ -100,7 +107,7 @@ module LodViewRewrite
 
     # filter, projection
 
-    def to_sparql( filters = [] )
+    def to_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
       # operators, options, patterns, prefixes, and filters
       sparql = ''
 
@@ -112,34 +119,35 @@ module LodViewRewrite
       ## options
 
       ## Operators
-      if operators.empty?
-        sparql << "SELECT *"
-      else
-        operators.each do |type,vars|
-          sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" if type
+      if condition.select == ""
+        if operators.empty?
+          sparql << "SELECT *"
+        else
+          operators.each do |type,vars|
+            sparql << "#{type.upcase} #{vars.map(&:to_s).join( ' ' )}" if type
+          end
         end
+      else # inject condition
+        sparql << condition.select
       end
 
       ## Patterns: WHERE Closure
       sparql << "\nWHERE {\n"
-      # sparql << patterns.join( "\n" )
       patterns.each { |pattern| sparql << "  #{pattern}\n" }
 
       ## FILTERs
-      filters.to_a.each { |filter| sparql << "  #{filter}\n" }
+      condition.filters.each { |filter| sparql << "  #{filter}\n" } unless condition.filters.empty?
 
       sparql << "}"
 
       ## Operator: Order By
       ## Operator: Group By, Having
 
-      sparql << "LIMIT 1000"
+      sparql << "\nLIMIT #{@limit}"
       sparql
     end
 
-    def exec_sparql( filter = [] )
-      sparql = to_sparql( filter )
-
+    def exec_sparql( condition = [] )
       uri = URI "http://dbpedia.org/sparql" # !!
 
       # About request format
@@ -147,7 +155,7 @@ module LodViewRewrite
 
       params = {
         'default-uri-graph' => "http://dbpedia.org", # !!
-        'query' => to_sparql( filter ),
+        'query' => to_sparql( condition ),
         'format' => 'application/json', # 'text/html'
         # 'timeout' => '30000',
         # 'debug' => 'on',

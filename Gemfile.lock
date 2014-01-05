@@ -1,23 +1,19 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    builder (3.1.4)
+    builder (3.2.2)
     diff-lcs (1.2.5)
-    ebnf (0.3.3)
+    ebnf (0.3.5)
       rdf
       sxp
     json (1.8.1)
-    mini_portile (0.5.1)
     net-http-persistent (2.9)
-    nokogiri (1.6.0)
-      mini_portile (~> 0.5.0)
-    rake (10.1.0)
-    rdf (1.1.0.1)
+    rake (10.1.1)
+    rdf (1.1.1.1)
     rdf-aggregate-repo (1.1.0)
       rdf (>= 1.1)
-    rdf-xsd (1.0.2.1)
-      nokogiri (>= 1.5.0)
-      rdf (>= 0.3.4)
+    rdf-xsd (1.1.0)
+      rdf (>= 1.1)
     rspec (2.14.1)
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)

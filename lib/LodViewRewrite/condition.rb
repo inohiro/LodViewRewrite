@@ -127,7 +127,7 @@ module LodViewRewrite
       else
         raise UnknownFilterConditionType
       end
-      select << "\n"
+      select # << "\n"
     end
 
     def build_aggregation_from_condition( condition )
@@ -148,7 +148,7 @@ module LodViewRewrite
       else
         raise UnkwnownAggregationType
       end
-      select.strip << "\n"
+      select.strip # << "\n"
     end
 
     def hatenize( variable, prefix = '' )
