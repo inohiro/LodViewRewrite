@@ -6,7 +6,7 @@ describe LodViewRewrite::Query do
 
   context 'when limit is fixed' do
     let (:sparql) { "SELECT * WHERE { ?s <http://example.com/predicate> ?o . }" }
-    let (:query) { LodViewRewrite::Query.new( sparql, 2000 ) }
+    let (:query) { LodViewRewrite::Query.new( sparql, :js, 2000 ) }
 
     it 'limit is fixed' do
       query.limit.should eq 2000
@@ -37,7 +37,7 @@ WHERE {
   ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
 }
 EOQ
-      @query = LodViewRewrite::Query.new( sparql, 1000, :tsv )
+      @query = LodViewRewrite::Query.new( sparql, :tsv )
     end
 
     it 'response will be tsv' do

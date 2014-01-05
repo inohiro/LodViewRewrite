@@ -6,7 +6,7 @@ module LodViewRewrite
 
     attr_reader :limit
 
-    def initialize( sparql = '', limit = 1000, response_format = :js )
+    def initialize( sparql = '', response_format = :js, limit = 1000 )
       @raw = sparql
       @http = Net::HTTP::Persistent.new
       @structured = Hash.new
