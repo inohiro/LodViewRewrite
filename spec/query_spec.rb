@@ -14,7 +14,7 @@ describe LodViewRewrite::Query do
 
     it 'appears in re-written query' do
       cond = [
-        {"FilterType"=>"3", "ConditionType"=>"System.String", "Variable"=>"o", "Condition"=>"hoge", "Operator"=>"="}
+        {"FilterType"=>3, "ConditionType"=>"System.String", "Variable"=>"o", "Condition"=>"hoge", "Operator"=>"="}
       ].to_json
       conditions = LodViewRewrite::Condition.new( cond )
       expected =<<EOQ
@@ -76,7 +76,7 @@ EOQ
 
     it 'can be injected a condition' do
       cond = [
-        {"FilterType"=>"3", "ConditionType"=>"System.String", "Variable"=>"subject", "Condition"=>"hoge", "Operator"=>"="}
+        {"FilterType"=>3, "ConditionType"=>"System.String", "Variable"=>"subject", "Condition"=>"hoge", "Operator"=>"="}
       ].to_json
       conditions = LodViewRewrite::Condition.new( cond )
       expected =<<EOQ
@@ -144,7 +144,7 @@ EOQ
 
     it 'can be injected FILTER condition' do
       cond = [
-        {"FilterType"=>"3", "ConditionType"=>"System.String", "Variable"=>"subject", "Condition"=>"hoge", "Operator"=>"="}
+        {"FilterType"=>3, "ConditionType"=>"System.String", "Variable"=>"subject", "Condition"=>"hoge", "Operator"=>"="}
       ].to_json
       conditions = LodViewRewrite::Condition.new( cond )
       expected =<<EOQ
@@ -160,7 +160,7 @@ EOQ
 
     context 'inject aggregation condition' do
       let (:cond) { [
-          {"AggregationType"=>"3", "Variable"=>"subject"}
+          {"AggregationType"=>3, "Variable"=>"subject"}
         ] }
       let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
 
@@ -183,10 +183,10 @@ EOQ
 
     it 'can be injected complex conditions' do
       cond = [
-        {"SelectionType"=>'1', "Variables"=>[
-            {"Variable"=>"subject", "Condition"=>"", "Operator"=>"", "SelectionType"=>'0'},
-            {"Variable"=>"age", "Condition"=>"", "Operator"=>"", "SelectionType"=>'0'}]},
-        {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>'3', "ConditionType"=>"System.String"} ]
+        {"SelectionType"=>1, "Variables"=>[
+            {"Variable"=>"subject", "Condition"=>"", "Operator"=>"", "SelectionType"=>0},
+            {"Variable"=>"age", "Condition"=>"", "Operator"=>"", "SelectionType"=>0}]},
+        {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>3, "ConditionType"=>"System.String"} ]
       conditions = LodViewRewrite::Condition.new( cond.to_json )
       expected =<<EOQ
 SELECT ?subject ?age
@@ -201,8 +201,8 @@ EOQ
 
     context 'can be inject complex aggregation conditions' do
       let (:cond) { [
-        {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>'3',"ConditionType"=>"System.String"},
-        {"Variable"=>"subject", "AggregationType"=>'3'} # count of ?subject
+        {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+        {"Variable"=>"subject", "AggregationType"=>3} # count of ?subject
       ] }
       let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
 

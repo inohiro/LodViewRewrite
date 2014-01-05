@@ -65,16 +65,16 @@ module LodViewRewrite
       filter = "FILTER "
 
       case condition['FilterType']
-      when '0'
+      when 0
         # build_regex_filter( condition )
         filter << "regex ( #{hatenize( condition['var'] )}, \"#{condition['condition']}\""
         filter << ", \"#{condition['flag']}\"" if condition['flag']
         filter << " )"
-      when '1'
+      when 1
         filter << "EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
-      when '2'
+      when 2
         filter << "NOT EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
-      when '3'
+      when 3
         if condition['ConditionType'] == "System.String"
           filter << "(str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
         elsif condition['ConditionType'] == "System.Int32" # integer
@@ -109,7 +109,7 @@ module LodViewRewrite
       select = "SELECT "
 
       case condition['SelectionType']
-      when '0' # SingleSelection
+      when 0 # SingleSelection
         select << "#{hatenize(condition["Variable"])}"
 
         if condition['ConditionType'] == "System.String"
@@ -117,12 +117,12 @@ module LodViewRewrite
         elsif condition['ConditionType'] == "System.Int32" # integer
           @filters << "FILTER (#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
         end
-      when '1' # MultipleSelection
+      when 1 # MultipleSelection
         condition["Variables"].each do |var|
-          select << "#{hatenize( var["Variable"])} " if var["SelectionType"] == '0' # SingleSelection
+          select << "#{hatenize( var["Variable"])} " if var["SelectionType"] == 0 # SingleSelection
         end
         select.strip!
-      when '2' # All
+      when 2 # All
         select << "*"
       else
         raise UnknownFilterConditionType
@@ -135,15 +135,15 @@ module LodViewRewrite
       variable = condition["Variable"]
 
       case condition['AggregationType']
-      when '0' # Min
+      when 0 # Min
         select << "(MIN(#{hatenize(variable)}) AS #{hatenize(variable, 'min_')})"
-      when '1' # Max
+      when 1 # Max
         select << "(MAX(#{hatenize(variable)}) AS #{hatenize(variable, 'max_')})"
-      when '2' # Sum
+      when 2 # Sum
         select << "(SUM(#{hatenize(variable)}) AS #{hatenize(variable, 'sum_')})"
-      when '3' # Count
+      when 3 # Count
         select << "(COUNT(#{hatenize(variable)}) AS #{hatenize(variable, 'count_')})"
-      when '4' # Average
+      when 4 # Average
         select << "(AVG(#{hatenize(variable)}) AS #{hatenize(variable, 'avg_')})"
       else
         raise UnkwnownAggregationType

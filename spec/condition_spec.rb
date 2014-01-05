@@ -25,7 +25,7 @@ describe LodViewRewrite::Condition do
     describe 'numerical filter condition' do
       context 'operator is Equal' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"="} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"="} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -36,7 +36,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is GreaterThan' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>">"} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>">"} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -47,7 +47,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is SmallerThan' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"<"} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"<"} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -58,7 +58,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is GreaterThanOrEqual' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>">="} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>">="} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -69,7 +69,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is SmallerThanOrEqual' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"<="} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.Int32", "Variable"=>"age", "Condition"=>"30", "Operator"=>"<="} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -83,7 +83,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is Equal' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.String", "Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"="} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.String", "Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"="} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -94,7 +94,7 @@ describe LodViewRewrite::Condition do
 
       context 'operator is NotEqual' do
         before :each do
-          cond = [ {"FilterType"=>"3", "ConditionType"=>"System.String", "Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"!="} ]
+          cond = [ {"FilterType"=>3, "ConditionType"=>"System.String", "Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"!="} ]
           @conditions = LodViewRewrite::Condition.new( cond.to_json )
         end
 
@@ -110,7 +110,7 @@ describe LodViewRewrite::Condition do
 
     context 'SingleSelection with no condition' do
       before :each do
-        cond = [ {"SelectionType"=>"0", "Variable"=>"name"} ]
+        cond = [ {"SelectionType"=>0, "Variable"=>"name"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -121,7 +121,7 @@ describe LodViewRewrite::Condition do
 
     context 'SingleSelection with numerical condition' do
       before :each do
-        cond = [ {"SelectionType"=>"0", "Variable"=>"age", "Operator"=>"=", "Condition"=>"30", "ConditionType"=>"System.Int32"} ]
+        cond = [ {"SelectionType"=>0, "Variable"=>"age", "Operator"=>"=", "Condition"=>"30", "ConditionType"=>"System.Int32"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -136,7 +136,7 @@ describe LodViewRewrite::Condition do
 
     context 'SingleSelection with string condition' do
       before :each do
-        cond = [ {"SelectionType"=>"0", "Variable"=>"name", "Operator"=>"=", "Condition"=>"inohiro", "ConditionType"=>"System.String"} ]
+        cond = [ {"SelectionType"=>0, "Variable"=>"name", "Operator"=>"=", "Condition"=>"inohiro", "ConditionType"=>"System.String"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -151,9 +151,9 @@ describe LodViewRewrite::Condition do
 
     context 'MultipleSelection' do
       before :each do
-        cond = [ {'SelectionType'=>'1', 'Variables'=> [
-              {'SelectionType'=>'0', 'Variable'=>'name'},
-              {'SelectionType'=>'0', 'Variable'=>'age'}
+        cond = [ {'SelectionType'=>1, 'Variables'=> [
+              {'SelectionType'=>0, 'Variable'=>'name'},
+              {'SelectionType'=>0, 'Variable'=>'age'}
             ]}]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
@@ -165,7 +165,7 @@ describe LodViewRewrite::Condition do
 
     context 'All Selection' do
       before :each do
-        cond = [ {'SelectionType'=>'2'} ]
+        cond = [ {'SelectionType'=>2} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -179,7 +179,7 @@ describe LodViewRewrite::Condition do
   describe 'with simple aggregation' do
     describe 'Min' do
       before :each do
-        cond = [ {"AggregationType"=>"0", "Variable"=>"age"} ]
+        cond = [ {"AggregationType"=>0, "Variable"=>"age"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -190,7 +190,7 @@ describe LodViewRewrite::Condition do
 
     describe 'Max' do
       before :each do
-        cond = [ {"AggregationType"=>"1", "Variable"=>"age"} ]
+        cond = [ {"AggregationType"=>1, "Variable"=>"age"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -201,7 +201,7 @@ describe LodViewRewrite::Condition do
 
     describe 'Sum' do
       before :each do
-        cond = [ {"AggregationType"=>"2", "Variable"=>"age"} ]
+        cond = [ {"AggregationType"=>2, "Variable"=>"age"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -212,7 +212,7 @@ describe LodViewRewrite::Condition do
 
     describe 'Count' do
       before :each do
-        cond = [ {"AggregationType"=>"3", "Variable"=>"name"} ]
+        cond = [ {"AggregationType"=>3, "Variable"=>"name"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -223,7 +223,7 @@ describe LodViewRewrite::Condition do
 
     describe 'Average' do
       before :each do
-        cond = [ {"AggregationType"=>"4", "Variable"=>"age"} ]
+        cond = [ {"AggregationType"=>4, "Variable"=>"age"} ]
         @conditions = LodViewRewrite::Condition.new( cond.to_json )
       end
 
@@ -236,10 +236,10 @@ describe LodViewRewrite::Condition do
   describe 'with complex input,' do
     before :each do
       cond = [
-        {"SelectionType"=>'1', "Variables"=>[
-            {"Variable"=>"name", "Condition"=>"", "Operator"=>"", "SelectionType"=>'0'},
-            {"Variable"=>"age", "Condition"=>"", "Operator"=>"", "SelectionType"=>'0'}]},
-        {"Variable"=>"age", "Condition"=>"30", "Operator"=>"<=", "FilterType"=>'3', "ConditionType"=>"System.Int32"} ]
+        {"SelectionType"=>1, "Variables"=>[
+            {"Variable"=>"name", "Condition"=>"", "Operator"=>"", "SelectionType"=>0},
+            {"Variable"=>"age", "Condition"=>"", "Operator"=>"", "SelectionType"=>0}]},
+        {"Variable"=>"age", "Condition"=>"30", "Operator"=>"<=", "FilterType"=>3, "ConditionType"=>"System.Int32"} ]
       @conditions = LodViewRewrite::Condition.new( cond.to_json )
     end
 
@@ -255,8 +255,8 @@ describe LodViewRewrite::Condition do
   describe 'with aggregation conditions,' do
     before :each do
       cond = [
-        {"Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"=", "FilterType"=>'3',"ConditionType"=>"System.String"},
-        {"Variable"=>"age", "AggregationType"=>'4'}]
+        {"Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+        {"Variable"=>"age", "AggregationType"=>4}]
       @conditions = LodViewRewrite::Condition.new( cond.to_json )
     end
 
