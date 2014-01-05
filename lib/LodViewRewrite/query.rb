@@ -109,7 +109,7 @@ module LodViewRewrite
 
     def to_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
       # operators, options, patterns, prefixes, and filters
-      sparql = ''
+      sparql = ""
 
       ## PREFIX
       # sparql << prefixes.map { |prefix,uri| "PREFIX #{prefix} <#{uri}>" }.join( "\n" )
@@ -148,7 +148,7 @@ module LodViewRewrite
       sparql
     end
 
-    def exec_sparql( condition = [] )
+    def exec_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
       uri = URI "http://dbpedia.org/sparql" # !!
 
       # About request format

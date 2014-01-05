@@ -29,6 +29,22 @@ EOQ
     end
   end
 
+  context 'when simple query without conditions' do
+    before :each do
+      sparql =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+}
+EOQ
+      @query = LodViewRewrite::Query.new sparql
+    end
+
+    it 'to_sparql will be success' do
+      @query.to_sparql.should_not be_empty
+    end
+  end
+
   context 'when simple query without PREFIX' do
     before :each do
       sparql =<<EOQ

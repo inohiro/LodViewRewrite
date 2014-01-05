@@ -5,8 +5,23 @@ require 'json'
 
 describe LodViewRewrite::Condition do
 
-  describe 'with simple filter' do
+  context 'no conditions' do
+    before :each do
+      @conditions = LodViewRewrite::Condition.new( [].to_json )
+    end
 
+    it 'select will be empty' do
+      @conditions.select.should eq ""
+      @conditions.select.class.should eq String
+    end
+
+    it 'filters will be empty' do
+      @conditions.filters.should be_empty
+      @conditions.filters.class.should eq Array
+    end
+  end
+
+  describe 'with simple filter' do
     describe 'numerical filter condition' do
       context 'operator is Equal' do
         before :each do
