@@ -29,6 +29,23 @@ EOQ
     end
   end
 
+  context 'when response format is set as :tsv' do
+    before :each do
+      sparql =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+}
+EOQ
+      @query = LodViewRewrite::Query.new( sparql, 1000, :tsv )
+    end
+
+    it 'response will be tsv' do
+      header = @query.exec_sparql.split( "\n" ).first
+      header.should eq "\"subject\""
+    end
+  end
+
   context 'when simple query without conditions' do
     before :each do
       sparql =<<EOQ
@@ -196,7 +213,6 @@ EOQ
       end
 
       it 'can execute sparql to dbpedia.org' do
-        pending 'dont request'
         expected = /42/
         expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
       end
@@ -240,7 +256,6 @@ EOQ
       end
 
       it 'can execute to DBpedia.org' do
-        pending 'dont request'
         expected_var_name = /count_subject/
         expected_count = /1/
         result = JSON.parse( @query.exec_sparql( conditions ) ).to_s

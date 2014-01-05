@@ -20,9 +20,6 @@ module LodViewRewrite
       build_conditions
     end
 
-    def to_a
-    end
-
     # Condition format:
     #   conditions are noted as a Array
     #   conditions includes a few hash elements
@@ -101,6 +98,8 @@ module LodViewRewrite
             @select = build_aggregation_from_condition( condition )
           end
         end
+      else
+        raise UnknownConditionType
       end
     end
     private :build_conditions
