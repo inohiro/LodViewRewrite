@@ -158,6 +158,26 @@ EOQ
       @query.to_sparql( conditions ).should eq expected.strip!
     end
 
+    context 'inject just single selection condition' do
+      let (:cond) { [
+          {'SelectionType'=>0, 'Variable'=>'subject','Condition'=>'inohiro', 'Operator'=>'=', 'ConditionType'=>'System.String'}
+        ].to_json }
+      let (:conditions) { LodViewRewrite::Condition.new( cond )}
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT ?subject
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = \"inohiro\")
+}
+LIMIT 1000
+EOQ
+        @query.to_sparql( conditions ).should eq expected.strip!
+      end
+
+    end
+
     context 'inject aggregation condition' do
       let (:cond) { [
           {"AggregationType"=>3, "Variable"=>"subject"}
@@ -176,6 +196,7 @@ EOQ
       end
 
       it 'can execute sparql to dbpedia.org' do
+        pending 'dont request'
         expected = /42/
         expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
       end
@@ -219,6 +240,7 @@ EOQ
       end
 
       it 'can execute to DBpedia.org' do
+        pending 'dont request'
         expected_var_name = /count_subject/
         expected_count = /1/
         result = JSON.parse( @query.exec_sparql( conditions ) ).to_s
