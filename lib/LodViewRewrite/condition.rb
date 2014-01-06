@@ -3,21 +3,24 @@
 module LodViewRewrite
   class Condition
 
-    attr_reader :filters, :select
+    attr_reader :select, :filters, :orderby, :groupby_affected_conditions, :groupby
 
     def initialize( json = '', response_format = :js )
       unless json == ''
         @json = json
-        @loaded = ''
+        @conditions = nil
         @filters = []
         @select = ''
+        @orderby = { 'Enable'=>false, 'Type'=> 0, 'Variable'=>'', 'Method'=>'' } # type: { 1: OrderBy, 2: OrderByDescending }
+        @groupby_affected_conditions = []
+        @groupby = { 'Enable'=>false, 'Variable'=>'', 'Having'=> {} }
         @response_format = Utility.set_response_format( response_format )
         parse
       end
     end
 
     def parse
-      @loaded = JSON.load( @json )
+      @conditions = JSON.load( @json ) || []
       build_conditions
     end
 
@@ -49,7 +52,8 @@ module LodViewRewrite
     # Aggregation:
     #
     # AggregationType:
-    #   0: Min, 1: Max, 2: Sum, 3: Count, 4: Average
+    #   0: Min, 1: Max, 2: Sum, 3: Count, 4: Average, 5: GroupBy,
+    #   6: OrderBy, 7: OrderByDescending
     #
     #  ex1) [{"Variable"=>"age", "AggregationType"=>1}]
     #    => "SELECT (MIN(?age) AS ?min_age WHERE { ..."
@@ -58,8 +62,11 @@ module LodViewRewrite
     #        {"Variable"=>"age", "AggregationType"=>4}]
     #    => "SELECT (AVG(?age) AS ?avg_age) WHERE { ... FILTER( ?name, "inohiro" ) }"
     #
+    #  If conditions contain 'GroupBy (5)', the last condition will be GroupBy condition,
+    #  the first condition of conditions will be 'Having' condition of GroupBy.
+    #
 
-    def build_filter_from_condition( condition = [] )
+    def build_filter_from_condition( condition )
       filter = "FILTER "
 
       case condition['FilterType']
@@ -85,25 +92,45 @@ module LodViewRewrite
       end
       filter
     end
-    private :build_filter_from_condition
 
     def build_conditions
-      if @loaded.class == Array
-        # @loaded.map { |condition| build_filter_from_condition( condition ) }
-        @loaded.each do |condition|
-          if condition.key?( "FilterType" )
-            @filters << build_filter_from_condition( condition )
-          elsif condition.key?( "SelectionType" )
-            @select = build_select_closure_from_condition( condition )
-          elsif condition.key?( "AggregationType" )
-            @select = build_aggregation_from_condition( condition )
+      if @conditions.class == Array && @conditions.size != 0
+        unless detect_having_query
+          @conditions.each do |condition|
+            if condition.key?( "FilterType" )
+              @filters << build_filter_from_condition( condition )
+            elsif condition.key?( "SelectionType" )
+              @select = build_select_closure_from_condition( condition )
+            elsif condition.key?( "AggregationType" )
+              @select = build_aggregation_from_condition( condition )
+            end
           end
         end
       else
-        raise UnknownConditionType
+        # do nothing
       end
     end
-    private :build_conditions
+
+    def detect_having_query
+      last = @conditions.last
+
+      if (last.key? 'AggregationType') && (last['AggregationType'] == 5)
+        ### ORDER BY Condition ###
+        @groupby['Enable'] = true
+        @groupby['Variable'] = hatenize( last['Variable'] )
+
+        ### HAVING Condition ###
+        first = @conditions.first.dup
+        @groupby['Having'] = first
+        @groupby['Having']['Variable'] = hatenize( first['Variable'] )
+
+        @conditions.each {|condition| @groupby_affected_conditions << condition }
+        @groupby_affected_conditions.pop # delete last condition
+        true
+      else
+        false
+      end
+    end
 
     def build_select_closure_from_condition( condition )
       select = "SELECT "
@@ -134,6 +161,9 @@ module LodViewRewrite
       select = "SELECT "
       variable = condition["Variable"]
 
+      # detect group by
+      # it requires variable set
+
       case condition['AggregationType']
       when 0 # Min
         select << "(MIN(#{hatenize(variable)}) AS #{hatenize(variable, 'min_')})"
@@ -145,6 +175,19 @@ module LodViewRewrite
         select << "(COUNT(#{hatenize(variable)}) AS #{hatenize(variable, 'count_')})"
       when 4 # Average
         select << "(AVG(#{hatenize(variable)}) AS #{hatenize(variable, 'avg_')})"
+      when 5 # GroupBy (Having)
+      when 6 # OrderBy
+        select = ''
+        @orderby['Enable'] = true
+        @orderby['Type'] = 1 # OrderBy
+        @orderby['Variable'] = hatenize( variable )
+        @orderby['Method'] = condition['OrderByInnerMethod'].to_s if condition['OrderByInnerMethod']
+      when 7 # OrderByDescending
+        select = ''
+        @orderby['Enable'] = true
+        @orderby['Type'] = 2 # OrderByDescending
+        @orderby['Variable'] = hatenize( variable )
+        @orderby['Method'] = condition['OrderByInnerMethod'].to_s if condition['OrderByInnerMethod']
       else
         raise UnkwnownAggregationType
       end

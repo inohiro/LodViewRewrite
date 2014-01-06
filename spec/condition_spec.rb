@@ -6,19 +6,64 @@ require 'json'
 describe LodViewRewrite::Condition do
 
   context 'no conditions' do
-    before :each do
-      @conditions = LodViewRewrite::Condition.new( [].to_json )
-    end
+    let (:conditions) { LodViewRewrite::Condition.new( [].to_json ) }
 
     it 'select will be empty' do
-      @conditions.select.should eq ""
-      @conditions.select.class.should eq String
+      expect( conditions.select ).to eq ""
+      expect( conditions.select.class ).to eq String
     end
 
     it 'filters will be empty' do
-      @conditions.filters.should be_empty
-      @conditions.filters.class.should eq Array
+      expect( conditions.filters ).to be_empty
+      expect( conditions.filters.class ).to eq Array
     end
+  end
+
+  describe 'detect_having_query' do
+    context 'when GROUP BY query is contained' do
+      let (:cond) { [
+          {"Variable"=>"e","Condition"=>"30","Operator"=>"<","FilterType"=>3,"ConditionType"=>"System.Int32"},
+          {"Variable"=>"name","Condition"=>"inohiro","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"Affiliation","AggregationType"=>5,"OrderByInnerMethod"=>nil}]
+      }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can detect GROUP BY query' do
+        expect( conditions.groupby['Enable'] ).to be_true
+        expect( conditions.groupby['Variable'] ).to eq('?Affiliation')
+      end
+
+      it 'Having condition will be set' do
+        expect( conditions.groupby['Having'] ).not_to be_empty
+        expect( conditions.groupby['Having']['Variable'] ).to eq('?e')
+      end
+
+      it 'groupby_affected_conditions will be filled' do
+        expect( conditions.groupby_affected_conditions ).not_to be_empty
+        expect( conditions.groupby_affected_conditions.size ).to eq 2
+      end
+
+      it 'select closure and filters will be empty' do
+        expect( conditions.select ).to be_empty
+        expect( conditions.filters ).to be_empty
+      end
+    end
+
+    context 'when GROUP BY query is not contained' do
+      let (:cond) { [
+          {"Variable"=>"name","Condition"=>"inohiro","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"age","AggregationType"=>6,"OrderByInnerMethod"=>nil} ]}
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'default parsing will run' do
+        expect( conditions.groupby['Enable'] ).to be_false
+        expect( conditions.filters ).to eq( ['FILTER (str(?name) = "inohiro")'] )
+        expect( conditions.select ).to eq ""
+      end
+
+    end
+
+
   end
 
   describe 'with simple filter' do

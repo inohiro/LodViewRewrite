@@ -7,6 +7,7 @@ module LodViewRewrite
     attr_reader :limit
 
     def initialize( sparql = '', response_format = :js, limit = 1000 )
+      @condition = nil
       @raw = sparql
       @http = Net::HTTP::Persistent.new
       @structured = Hash.new
@@ -14,6 +15,7 @@ module LodViewRewrite
       @response_format = Utility.set_response_format( response_format )
       unless sparql == ''
         @structured = parse
+        @all_variables = find_all_variables
       end
     end
 
@@ -25,6 +27,16 @@ module LodViewRewrite
     def patterns; @structured['patterns'] || []; end
     def operators; @structured['operators'] || []; end
     # def filters; @structured['filters']; end
+
+    def find_all_variables
+      candidates = []
+      @structured['patterns'].each do |pattern|
+        splitted_pattern = pattern.split( /\s+/ )
+        splitted_pattern.each { |word| candidates << word if word =~ /\^?\w+/ }
+      end
+      candidates
+    end
+    private :find_all_variables
 
     def parse
       parsed = SPARQL.parse( @raw )
@@ -108,16 +120,39 @@ module LodViewRewrite
 
     # filter, projection
 
+    def detect_having_query
+      if @condition.groupby['Enable'] == true
+        query = "GROUP BY #{@condition.groupby['Variable']}\n"
+        having = @condition.groupby['Having']
+
+        if @all_variables.include? having['Variable'] # It seems not a Having query
+          @condition.affected_conditions << having
+          return query
+        else # It looks a Having query
+          query << 'HAVING('
+          if having['ConditionType'] == 'System.String'
+            query << "str(#{having['Variable']}) #{having['Operator']} #{having['Condition']})"
+          elsif having['ConditionType'] == 'System.Int32'
+            query << "#{having['Variable']}) #{having['Operator']} #{having['Condition']})"
+          end
+          return query
+        end
+      else
+        return false
+      end
+    end
+
     def to_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
+      @condition = condition
+
       # operators, options, patterns, prefixes, and filters
-      sparql = ""
+      sparql = ''
+      having_query = ''
 
-      ## PREFIX
-      # sparql << prefixes.map { |prefix,uri| "PREFIX #{prefix} <#{uri}>" }.join( "\n" )
-
-      # sparql << "\n"
-
-      ## options
+      if condition.groupby['Having']['Enable']
+        having_query = detect_having_query
+        condition.build_regex_filter
+      end
 
       ## Operators
 
@@ -142,8 +177,11 @@ module LodViewRewrite
 
       sparql << "}"
 
+      # GroupBy, Having
+      sparql << include_having unless having_query.empty?
+
       ## Operator: Order By
-      ## Operator: Group By, Having
+
 
       sparql << "\nLIMIT #{@limit}"
       sparql
