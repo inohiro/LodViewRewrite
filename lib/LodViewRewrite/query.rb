@@ -4,7 +4,7 @@ module LodViewRewrite
 
   class Query
 
-    attr_reader :limit
+    attr_reader :limit, :row, :structured
 
     def initialize( sparql = '', response_format = :js, limit = 1000 )
       @condition = nil
@@ -18,9 +18,6 @@ module LodViewRewrite
         @all_variables = find_all_variables
       end
     end
-
-    attr_reader :row, :structured
-    # attr_accessor :filters
 
     def prefixes; @structured['prefixes'] || []; end
     def options; @structured['options'] || []; end
@@ -121,19 +118,21 @@ module LodViewRewrite
     # filter, projection
 
     def detect_having_query
+      puts "in detect_having_query"
       if @condition.groupby['Enable'] == true
-        query = "GROUP BY #{@condition.groupby['Variable']}\n"
+        query = "\nGROUP BY #{@condition.groupby['Variable']}"
         having = @condition.groupby['Having']
 
         if @all_variables.include? having['Variable'] # It seems not a Having query
-          @condition.affected_conditions << having
           return query
         else # It looks a Having query
-          query << 'HAVING('
+          @condition.groupby_affected_conditions.shift
+
+          query << "\nHAVING("
           if having['ConditionType'] == 'System.String'
-            query << "str(#{having['Variable']}) #{having['Operator']} #{having['Condition']})"
+            query << "str(#{having['Variable']}) #{having['Operator']} \"#{having['Condition']}\")"
           elsif having['ConditionType'] == 'System.Int32'
-            query << "#{having['Variable']}) #{having['Operator']} #{having['Condition']})"
+            query << "#{having['Variable']} #{having['Operator']} #{having['Condition']})"
           end
           return query
         end
@@ -149,13 +148,13 @@ module LodViewRewrite
       sparql = ''
       having_query = ''
 
-      if condition.groupby['Having']['Enable']
+      if condition.groupby['Enable']
         having_query = detect_having_query
-        condition.build_regex_filter
+        condition.build_conditions( condition.groupby_affected_conditions )
       end
 
-      ## Operators
 
+      ## Operators
       if condition.select != ""
         sparql = condition.select # inject condition
       else
@@ -174,11 +173,10 @@ module LodViewRewrite
 
       ## FILTERs
       condition.filters.each { |filter| sparql << "  #{filter}\n" } unless condition.filters.empty?
-
       sparql << "}"
 
       # GroupBy, Having
-      sparql << include_having unless having_query.empty?
+      sparql << having_query unless having_query.empty?
 
       ## Operator: Order By
 

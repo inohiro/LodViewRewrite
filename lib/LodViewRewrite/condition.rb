@@ -4,6 +4,7 @@ module LodViewRewrite
   class Condition
 
     attr_reader :select, :filters, :orderby, :groupby_affected_conditions, :groupby
+    attr_writer :groupby_affected_conditions
 
     def initialize( json = '', response_format = :js )
       unless json == ''
@@ -93,10 +94,11 @@ module LodViewRewrite
       filter
     end
 
-    def build_conditions
-      if @conditions.class == Array && @conditions.size != 0
+    def build_conditions( conditions = @conditions )
+
+      if conditions.class == Array && conditions.size != 0
         unless detect_having_query
-          @conditions.each do |condition|
+          conditions.each do |condition|
             if condition.key?( "FilterType" )
               @filters << build_filter_from_condition( condition )
             elsif condition.key?( "SelectionType" )
@@ -124,8 +126,9 @@ module LodViewRewrite
         @groupby['Having'] = first
         @groupby['Having']['Variable'] = hatenize( first['Variable'] )
 
+        @conditions.pop
         @conditions.each {|condition| @groupby_affected_conditions << condition }
-        @groupby_affected_conditions.pop # delete last condition
+        # @groupby_affected_conditions.pop # delete last condition
         true
       else
         false

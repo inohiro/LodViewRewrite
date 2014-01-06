@@ -3,6 +3,7 @@
 require 'spec_helper.rb'
 
 describe LodViewRewrite::Query do
+  let (:request_remote) { false }
 
   context 'when limit is fixed' do
     let (:sparql) { "SELECT * WHERE { ?s <http://example.com/predicate> ?o . }" }
@@ -41,6 +42,7 @@ EOQ
     end
 
     it 'response will be tsv' do
+      pending 'do not access' unless request_remote
       header = @query.exec_sparql.split( "\n" ).first
       header.should eq "\"subject\""
     end
@@ -213,6 +215,7 @@ EOQ
       end
 
       it 'can execute sparql to dbpedia.org' do
+        pending 'do not access' unless request_remote
         expected = /42/
         expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
       end
@@ -256,6 +259,7 @@ EOQ
       end
 
       it 'can execute to DBpedia.org' do
+        pending 'do not access' unless request_remote
         expected_var_name = /count_subject/
         expected_count = /1/
         result = JSON.parse( @query.exec_sparql( conditions ) ).to_s
@@ -263,6 +267,83 @@ EOQ
         expect( result ).to match( expected_count )
       end
     end
+  end
+
+  describe 'with GROUP BY condition' do
+    context 'only GROUP BY condition' do
+      let (:cond) { [
+          {"Variable"=>"subject","Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"affiliation","AggregationType"=>5,"OrderByInnerMethod"=>nil} ] }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+      let (:view) { "SELECT * WHERE { ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> . }" }
+      let (:query) { LodViewRewrite::Query.new( view, :tsv ) }
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+GROUP BY ?affiliation
+LIMIT 1000
+EOQ
+
+        expect( query.to_sparql( conditions ) ).to eq expected.strip!
+      end
+
+    end
+
+    context 'with Having condition' do
+      let (:numerical_having) { [
+          {"Variable"=>"e","Condition"=>"30","Operator"=>"<","FilterType"=>3,"ConditionType"=>"System.Int32"},
+          {"Variable"=>"subject","Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"affiliation","AggregationType"=>5,"OrderByInnerMethod"=>nil} ] }
+      let (:numerical_conditions) { LodViewRewrite::Condition.new( numerical_having.to_json ) }
+
+      let (:string_having) { [
+          {"Variable"=>"e","Condition"=>"Tsukuba","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"subject","Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo","Operator"=>"=","FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"affiliation","AggregationType"=>5,"OrderByInnerMethod"=>nil} ] }
+      let (:string_conditions) { LodViewRewrite::Condition.new( string_having.to_json ) }
+
+      let (:view) { "SELECT * WHERE { ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> . }" }
+      let (:query) { LodViewRewrite::Query.new( view, :tsv ) }
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+GROUP BY ?affiliation
+HAVING(?e < 30)
+LIMIT 1000
+EOQ
+
+        expect( query.to_sparql( numerical_conditions ) ).to eq expected.strip!
+      end
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+GROUP BY ?affiliation
+HAVING(str(?e) = "Tsukuba")
+LIMIT 1000
+EOQ
+        expect( query.to_sparql( string_conditions ) ).to eq expected.strip!
+      end
+
+    end
+  end
+
+  describe 'with ORDER BY condition' do
+
   end
 
 end
