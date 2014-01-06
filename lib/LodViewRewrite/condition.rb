@@ -3,7 +3,7 @@
 module LodViewRewrite
   class Condition
 
-    attr_reader :filters, :select
+    attr_reader :filters, :select, :groupby, :orderby
 
     def initialize( json = '', response_format = :js )
       unless json == ''
@@ -11,6 +11,8 @@ module LodViewRewrite
         @loaded = ''
         @filters = []
         @select = ''
+        @groupby = ''
+        @orderby = ''
         @response_format = Utility.set_response_format( response_format )
         parse
       end
@@ -49,7 +51,8 @@ module LodViewRewrite
     # Aggregation:
     #
     # AggregationType:
-    #   0: Min, 1: Max, 2: Sum, 3: Count, 4: Average
+    #   0: Min, 1: Max, 2: Sum, 3: Count, 4: Average,
+    #   5: GroupBy, 5: OrderBy, 6: OrderByDescending
     #
     #  ex1) [{"Variable"=>"age", "AggregationType"=>1}]
     #    => "SELECT (MIN(?age) AS ?min_age WHERE { ..."
@@ -145,10 +148,19 @@ module LodViewRewrite
         select << "(COUNT(#{hatenize(variable)}) AS #{hatenize(variable, 'count_')})"
       when 4 # Average
         select << "(AVG(#{hatenize(variable)}) AS #{hatenize(variable, 'avg_')})"
+      when 5 # GroupBy
+        @groupby << "GROUP BY #{hatenize(variable)}"
+        select << '*'
+      when 6 # OrderBy
+        @orderby << "ORDER BY #{hatenize(variable)}"
+        select << '*'
+      when 7 # OrderByDescending
+        @orderby << "ORDER BY DESC(#{hatenize(variable)})"
+        select << '*'
       else
         raise UnkwnownAggregationType
       end
-      select.strip # << "\n"
+      select.strip
     end
 
     def hatenize( variable, prefix = '' )

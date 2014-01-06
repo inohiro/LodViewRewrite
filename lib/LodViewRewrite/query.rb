@@ -142,9 +142,20 @@ module LodViewRewrite
 
       sparql << "}"
 
-      ## Operator: Order By
       ## Operator: Group By, Having
 
+      unless condition.groupby.empty?
+        sparql << "\n"
+        sparql << condition.groupby
+      end
+
+      ## Operator: Order By
+      unless condition.orderby.empty?
+        sparql << "\n"
+        sparql << condition.orderby
+      end
+
+      ## Limit
       sparql << "\nLIMIT #{@limit}"
       sparql
     end

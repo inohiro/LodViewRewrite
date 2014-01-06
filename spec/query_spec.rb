@@ -3,6 +3,7 @@
 require 'spec_helper.rb'
 
 describe LodViewRewrite::Query do
+  let (:request_remote) { true }
 
   context 'when limit is fixed' do
     let (:sparql) { "SELECT * WHERE { ?s <http://example.com/predicate> ?o . }" }
@@ -41,6 +42,7 @@ EOQ
     end
 
     it 'response will be tsv' do
+      pending unless request_remote
       header = @query.exec_sparql.split( "\n" ).first
       header.should eq "\"subject\""
     end
@@ -213,6 +215,7 @@ EOQ
       end
 
       it 'can execute sparql to dbpedia.org' do
+        pending unless request_remote
         expected = /42/
         expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
       end
@@ -256,6 +259,7 @@ EOQ
       end
 
       it 'can execute to DBpedia.org' do
+        pending unless request_remote
         expected_var_name = /count_subject/
         expected_count = /1/
         result = JSON.parse( @query.exec_sparql( conditions ) ).to_s
@@ -265,4 +269,73 @@ EOQ
     end
   end
 
+  describe 'GROUP BY' do
+    let (:view) { "SELECT * WHERE { ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .}" }
+    let (:query) { LodViewRewrite::Query.new( view ) }
+
+    context 'support GROUP BY' do
+      let (:cond) { [
+          {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"affiliation", "AggregationType"=>5} ] }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+GROUP BY ?affiliation
+LIMIT 1000
+EOQ
+        query.to_sparql( conditions ).should eq expected.strip!
+      end
+    end
+  end
+
+  describe 'ORDER BY' do
+    let (:view) { "SELECT * WHERE { ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .}" }
+    let (:query) { LodViewRewrite::Query.new( view ) }
+
+    context 'ORDER BY' do
+      let (:cond) { [
+          {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"age", "AggregationType"=>6} ] }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+ORDER BY ?age
+LIMIT 1000
+EOQ
+        query.to_sparql( conditions ).should eq expected.strip!
+      end
+    end
+
+    context 'ORDER BY Descending' do
+      let (:cond) { [
+          {"Variable"=>"subject", "Condition"=>"http://dbpedia.org/resource/Minato,_Tokyo", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"age", "AggregationType"=>7} ] }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can generate query correctly' do
+        expected =<<EOQ
+SELECT *
+WHERE {
+  ?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .
+  FILTER (str(?subject) = "http://dbpedia.org/resource/Minato,_Tokyo")
+}
+ORDER BY DESC(?age)
+LIMIT 1000
+EOQ
+        query.to_sparql( conditions ).should eq expected.strip!
+      end
+    end
+  end
 end

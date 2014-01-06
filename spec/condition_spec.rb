@@ -267,7 +267,44 @@ describe LodViewRewrite::Condition do
     it 'can parse string filters' do
       @conditions.filters.should eq ['FILTER (str(?name) = "inohiro")']
     end
+  end
 
+  describe 'support ORDER BY' do
+
+    context 'ORDER BY' do
+      let (:cond) { [
+          {"Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"age", "AggregationType"=>6} ] }
+      let (:conditions) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can parse correctly' do
+        expect( conditions.orderby ).to eq "ORDER BY ?age"
+      end
+    end
+
+    context 'ORDER BY Descending' do
+      let (:cond) { [
+          {"Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"age", "AggregationType"=>7} ] }
+      let (:conditions ) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can parse correctly' do
+        expect( conditions.orderby ).to eq "ORDER BY DESC(?age)"
+      end
+    end
+  end
+
+  describe 'support GROUP BY' do
+    context 'GROUP BY' do
+      let (:cond) { [
+          {"Variable"=>"name", "Condition"=>"inohiro", "Operator"=>"=", "FilterType"=>3,"ConditionType"=>"System.String"},
+          {"Variable"=>"affiliation", "AggregationType"=>5} ] }
+      let (:conditions ) { LodViewRewrite::Condition.new( cond.to_json ) }
+
+      it 'can parse correctly' do
+        expect( conditions.groupby ).to eq "GROUP BY ?affiliation"
+      end
+    end
   end
 
 end
