@@ -161,16 +161,18 @@ module LodViewRewrite
     end
 
     def exec_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
-      uri = URI "http://dbpedia.org/sparql" # !!
+      # uri = URI "http://dbpedia.org/sparql" # !!
+      # uri = URI "http://192.168.11.9:3030/data10000/sparql"
+      uri = URI "http://192.168.11.9:3030/bsbm/sparql"
 
       # About request format
       # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
 
       sparql = to_sparql( condition )
       params = {
-        'default-uri-graph' => "http://dbpedia.org", # !!
+        # 'default-uri-graph' => ''  # "http://dbpedia.org", # !!
         'query' => sparql,
-        'format' => @response_format,
+        # 'format' => @response_format,
         # 'timeout' => '30000',
         # 'debug' => 'on',
       }
@@ -185,6 +187,8 @@ module LodViewRewrite
         return response.body
       else
         puts "QUERY: #{sparql}"
+        puts "URL: #{uri}"
+        puts "params: #{params['query']}"
         throw UnExpectedReturnCode
       end
     end

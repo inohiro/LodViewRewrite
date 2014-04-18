@@ -63,7 +63,7 @@ module LodViewRewrite
     #
 
     def build_filter_from_condition( condition = [] )
-      filter = "FILTER "
+      filter = "filter "
 
       case condition['FilterType']
       when 0
@@ -76,12 +76,14 @@ module LodViewRewrite
       when 2
         filter << "NOT EXISTS { #{condition['subject']} #{condition['predicate']} #{condition['object']} }"
       when 3
-        if condition['ConditionType'] == "System.String"
-          filter << "(str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
-        elsif condition['ConditionType'] == "System.Int32" # integer
-          filter << "(#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
-        else
-          raise UnknownConditionDataType
+        if condition['Condition'] !=''
+          if condition['ConditionType'] == "System.String"
+            filter << "(str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
+          elsif condition['ConditionType'] == "System.Int32" # integer
+            filter << "(#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
+          else
+            raise UnknownConditionDataType
+          end
         end
       else
         raise UnknownFilterConditionType
@@ -115,11 +117,12 @@ module LodViewRewrite
       when 0 # SingleSelection
         select << "#{hatenize(condition["Variable"])}"
 
-        if condition['ConditionType'] == "System.String"
-          @filters << "FILTER (str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
-        elsif condition['ConditionType'] == "System.Int32" # integer
-          @filters << "FILTER (#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
-        end
+        # if condition['ConditionType'] == "System.String"
+        #   @filters << "FILTER (str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
+        # elsif condition['ConditionType'] == "System.Int32" # integer
+        #   @filters << "FILTER (#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
+        # end
+
       when 1 # MultipleSelection
         condition["Variables"].each do |var|
           select << "#{hatenize( var["Variable"])} " if var["SelectionType"] == 0 # SingleSelection

@@ -18,11 +18,11 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "sparql"
-  spec.add_runtime_dependency "net-http-persistent"
+  spec.add_runtime_dependency "sparql", "~> 1.1", "~> 1.1"
+  spec.add_runtime_dependency "net-http-persistent", "~> 2.9"
 
   spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "sparql"
-  spec.add_development_dependency "net-http-persistent"
+  spec.add_development_dependency "rake", "~> 10.1"
+  # spec.add_development_dependency "sparql", "~> 1.1"
+  # spec.add_development_dependency "net-http-persistent", "~> 2.9"
 end
