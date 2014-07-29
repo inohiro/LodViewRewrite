@@ -63,7 +63,7 @@ module LodViewRewrite
     #
 
     def build_filter_from_condition(condition = [])
-      filter = "filter "
+      filter = "FILTER "
 
       case condition['FilterType']
       when 0
@@ -117,11 +117,11 @@ module LodViewRewrite
       when 0 # SingleSelection
         select << "#{hatenize(condition["Variable"])}"
 
-        # if condition['ConditionType'] == "System.String"
-        #   @filters << "FILTER (str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
-        # elsif condition['ConditionType'] == "System.Int32" # integer
-        #   @filters << "FILTER (#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
-        # end
+        if condition['ConditionType'] == "System.String"
+          @filters << "FILTER (str(#{hatenize( condition['Variable'] )}) #{condition['Operator']} \"#{condition['Condition']}\")"
+        elsif condition['ConditionType'] == "System.Int32" # integer
+          @filters << "FILTER (#{hatenize( condition['Variable'] )} #{condition['Operator']} #{condition['Condition']})"
+        end
 
       when 1 # MultipleSelection
         condition["Variables"].each do |var|

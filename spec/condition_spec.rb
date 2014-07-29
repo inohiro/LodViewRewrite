@@ -30,7 +30,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          expect(@conditions.filters).to eq(["FILTER (?age = 30"])
+          expect(@conditions.filters).to eq(["FILTER (?age = 30)"])
         end
       end
 
@@ -88,7 +88,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          expect(@conditions.filters).to eq(["FILTER (str(?name) = \"inohiro\""])
+          expect(@conditions.filters).to eq(["FILTER (str(?name) = \"inohiro\")"])
         end
       end
 
@@ -122,7 +122,7 @@ describe LodViewRewrite::Condition do
     context 'SingleSelection with numerical condition' do
       before :each do
         cond = [ {"SelectionType"=>0, "Variable"=>"age", "Operator"=>"=", "Condition"=>"30", "ConditionType"=>"System.Int32"} ]
-        @conditions = LodViewRewrite::Condition.new( cond.to_json )
+        @conditions = LodViewRewrite::Condition.new(cond.to_json)
       end
 
       it 'can parse SingleSelection condition' do
@@ -137,7 +137,7 @@ describe LodViewRewrite::Condition do
     context 'SingleSelection with string condition' do
       before :each do
         cond = [ {"SelectionType"=>0, "Variable"=>"name", "Operator"=>"=", "Condition"=>"inohiro", "ConditionType"=>"System.String"} ]
-        @conditions = LodViewRewrite::Condition.new( cond.to_json )
+        @conditions = LodViewRewrite::Condition.new(cond.to_json)
       end
 
       it 'can parse SingleSelection condition' do
