@@ -11,13 +11,13 @@ describe LodViewRewrite::Condition do
     end
 
     it 'select will be empty' do
-      @conditions.select.should eq ""
-      @conditions.select.class.should eq String
+      expect(@conditions.select).to eq ""
+      expect(@conditions.select.class).to eq(String)
     end
 
     it 'filters will be empty' do
-      @conditions.filters.should be_empty
-      @conditions.filters.class.should eq Array
+      expect(@conditions.filters).to be_empty
+      expect(@conditions.filters.class).to eq(Array)
     end
   end
 
@@ -30,7 +30,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (?age = 30)" ]
+          expect(@conditions.filters).to eq(["FILTER (?age = 30"])
         end
       end
 
@@ -41,7 +41,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (?age > 30)" ]
+          expect(@conditions.filters).to eq(["FILTER (?age > 30)"])
         end
       end
 
@@ -52,7 +52,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (?age < 30)" ]
+          expect(@conditions.filters).to eq(["FILTER (?age < 30)"])
         end
       end
 
@@ -63,7 +63,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (?age >= 30)" ]
+          expect(@conditions.filters).to eq(["FILTER (?age >= 30)"])
         end
       end
 
@@ -74,7 +74,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (?age <= 30)" ]
+          expect(@conditions.filters).to eq(["FILTER (?age <= 30)"])
         end
       end
     end
@@ -88,7 +88,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (str(?name) = \"inohiro\")" ]
+          expect(@conditions.filters).to eq(["FILTER (str(?name) = \"inohiro\""])
         end
       end
 
@@ -99,7 +99,7 @@ describe LodViewRewrite::Condition do
         end
 
         it 'can parse Equality filter' do
-          @conditions.filters.should eq [ "FILTER (str(?name) != \"inohiro\")" ]
+          expect(@conditions.filters).to eq(["FILTER (str(?name) != \"inohiro\")"])
         end
       end
 
@@ -115,7 +115,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse SingleSelection condition' do
-        @conditions.select.should eq "SELECT ?name"
+        expect(@conditions.select).to eq("SELECT ?name")
       end
     end
 
@@ -126,11 +126,11 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse SingleSelection condition' do
-        @conditions.select.should eq "SELECT ?age"
+        expect(@conditions.select).to eq("SELECT ?age")
       end
 
       it 'can parse filter condition' do
-        @conditions.filters.should eq [ "FILTER (?age = 30)" ]
+        expect(@conditions.filters).to eq(["FILTER (?age = 30)"])
       end
     end
 
@@ -141,11 +141,11 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse SingleSelection condition' do
-        @conditions.select.should eq "SELECT ?name"
+        expect(@conditions.select).to eq("SELECT ?name")
       end
 
       it 'can parse filter condition' do
-        @conditions.filters.should eq [ "FILTER (str(?name) = \"inohiro\")" ]
+        expect(@conditions.filters).to eq(["FILTER (str(?name) = \"inohiro\")"])
       end
     end
 
@@ -159,7 +159,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse MultipleSelection conditions' do
-        @conditions.select.should eq "SELECT ?name ?age"
+        expect(@conditions.select).to eq("SELECT ?name ?age")
       end
     end
 
@@ -170,7 +170,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse All Selection condition' do
-        @conditions.select.should eq "SELECT *"
+        expect(@conditions.select).to eq("SELECT *")
       end
     end
 
@@ -184,7 +184,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse Min aggregation condition' do
-        @conditions.select.should eq "SELECT (MIN(?age) AS ?min_age)"
+        expect(@conditions.select).to eq("SELECT (MIN(?age) AS ?min_age)")
       end
     end
 
@@ -195,7 +195,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse Max aggregation condition' do
-        @conditions.select.should eq "SELECT (MAX(?age) AS ?max_age)"
+        expect(@conditions.select).to eq("SELECT (MAX(?age) AS ?max_age)")
       end
     end
 
@@ -206,7 +206,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse Sum aggregation condition' do
-        @conditions.select.should eq "SELECT (SUM(?age) AS ?sum_age)"
+        expect(@conditions.select).to eq("SELECT (SUM(?age) AS ?sum_age)")
       end
     end
 
@@ -217,7 +217,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse Count aggregation condition' do
-        @conditions.select.should eq "SELECT (COUNT(?name) AS ?count_name)"
+        expect(@conditions.select).to eq("SELECT (COUNT(?name) AS ?count_name)")
       end
     end
 
@@ -228,7 +228,7 @@ describe LodViewRewrite::Condition do
       end
 
       it 'can parse Average aggregation condition' do
-        @conditions.select.should eq "SELECT (AVG(?age) AS ?avg_age)"
+        expect(@conditions.select).to eq("SELECT (AVG(?age) AS ?avg_age)")
       end
     end
   end
@@ -244,11 +244,11 @@ describe LodViewRewrite::Condition do
     end
 
     it 'can parse select closure' do
-      @conditions.select.should eq "SELECT ?name ?age"
+      expect(@conditions.select).to eq("SELECT ?name ?age")
     end
 
     it 'can parse numerical filters' do
-      @conditions.filters.should eq ["FILTER (?age <= 30)"]
+      expect(@conditions.filters).to eq(["FILTER (?age <= 30)"])
     end
   end
 
@@ -261,11 +261,11 @@ describe LodViewRewrite::Condition do
     end
 
     it 'can parse select closure' do
-      @conditions.select.should eq "SELECT (AVG(?age) AS ?avg_age)"
+      expect(@conditions.select).to eq("SELECT (AVG(?age) AS ?avg_age)")
     end
 
     it 'can parse string filters' do
-      @conditions.filters.should eq ['FILTER (str(?name) = "inohiro")']
+      expect(@conditions.filters).to eq(['FILTER (str(?name) = "inohiro")'])
     end
   end
 

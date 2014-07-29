@@ -3,14 +3,14 @@
 require 'spec_helper.rb'
 
 describe LodViewRewrite::Query do
-  let (:request_remote) { true }
+  let (:request_remote) { false }
 
   context 'when limit is fixed' do
     let (:sparql) { "SELECT * WHERE { ?s <http://example.com/predicate> ?o . }" }
     let (:query) { LodViewRewrite::Query.new( sparql, :js, 2000 ) }
 
     it 'limit is fixed' do
-      query.limit.should eq 2000
+      expect(query.limit).to eq 2000
     end
 
     it 'appears in re-written query' do
@@ -26,7 +26,7 @@ WHERE {
 }
 LIMIT 2000
 EOQ
-      query.to_sparql( conditions ).should eq expected.strip!
+      expect(query.to_sparql(conditions)).to eq(expected.strip!)
     end
   end
 
@@ -41,11 +41,13 @@ EOQ
       @query = LodViewRewrite::Query.new( sparql, :tsv )
     end
 
-    it 'response will be tsv' do
-      pending unless request_remote
-      header = @query.exec_sparql.split( "\n" ).first
-      header.should eq "\"subject\""
-    end
+    # it 'response will be tsv' do
+    #   pending 'query will timeout'
+    #   # pending unless request_remote
+    #   header = @query.exec_sparql.split( "\n" ).first
+    #   header.should eq "\"subject\""
+    # end
+
   end
 
   context 'when simple query without conditions' do
@@ -60,7 +62,7 @@ EOQ
     end
 
     it 'to_sparql will be success' do
-      @query.to_sparql.should_not be_empty
+      expect(@query.to_sparql).not_to be_empty
     end
   end
 
@@ -76,21 +78,21 @@ EOQ
     end
 
     it 'can be parsed' do
-      @query.should_not eq nil
+      expect(@query).not_to be_nil
     end
 
     it 'prefixes will be empty' do
-      @query.prefixes.should be_empty
+      expect(@query.prefixes).to be_empty
     end
 
     it 'options will be empty' do
       pending 'I should check default values'
-      @query.options.should be_empty
+      expect(@query.options).to be_empty
     end
 
     it 'patterns will be accessed' do
-      @query.patterns.should_not be_empty
-      @query.patterns.first.should eq "?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> ."
+      expect(@query.patterns).not_to be_empty
+      expect(@query.patterns.first).to eq("?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .")
     end
 
     it 'can be injected a condition' do
@@ -106,7 +108,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      @query.to_sparql( conditions ).should eq expected.strip!
+      expect(@query.to_sparql(conditions)).to eq(expected.strip!)
     end
 
   end
@@ -125,29 +127,29 @@ EOQ
     end
 
     it 'can parsed' do
-      @query.should_not eq nil
+      expect(@query).not_to be_nil
     end
 
     it 'can access to prefixes' do
-      @query.prefixes.should_not eq nil
-      @query.prefixes.size.should eq 2
-      @query.prefixes['dbpr'] == "http://dbpedia.org/resource/"
+      expect(@query.prefixes).not_to be_nil
+      expect(@query.prefixes.size).to eq(2)
+      expect(@query.prefixes['dbpr']).to eq("http://dbpedia.org/resource/")
     end
 
     it 'can acccess to options' do
       pending 'should check default values'
-      @query.options.should be_empty
+      expect(@query.options).to be_empty
     end
 
     it 'can access to patterns' do
-      @query.patterns.should_not be_empty
-      @query.patterns.count.should eq 1
-      @query.patterns.first.should eq "?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> ."
+      expect(@query.patterns).not_to be_em
+      expect(@query.patterns.count).to eq(1)
+      expect(@query.patterns.first).to eq("?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .")
     end
 
     it 'can access to operators' do
-      @query.operators.should_not eq nil
-      @query.operators.should be_empty # 'SELECT *' will be no operator
+      expect(@query.operators).not_to be_nil
+      expect(@query.operators).to be_empty
     end
 
     it 'can parse to SPARQL' do
@@ -158,7 +160,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      @query.to_sparql.should eq expected.strip!
+      expect(@auery.to_sparql).to eq(expected.strip!)
     end
 
     it 'can be injected FILTER condition' do
@@ -174,7 +176,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      @query.to_sparql( conditions ).should eq expected.strip!
+      expect(@query.to_sparql(conditions)).to eq(expected.strip!)
     end
 
     context 'inject just single selection condition' do
@@ -192,7 +194,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-        @query.to_sparql( conditions ).should eq expected.strip!
+        expect(@query.to_sparql(conditions)).to eq(expected.strip!)
       end
 
     end
@@ -211,14 +213,14 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-        @query.to_sparql( conditions ).should eq expected.strip!
+        expect(@query.to_sparql(conditions)).to eq(expected.strip!)
       end
 
-      it 'can execute sparql to dbpedia.org' do
-        pending unless request_remote
-        expected = /42/
-        expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
-      end
+      # it 'can execute sparql to dbpedia.org' do
+      #   pending unless request_remote
+      #   expected = /42/
+      #   expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
+      # end
     end
 
     it 'can be injected complex conditions' do
@@ -236,7 +238,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      @query.to_sparql( conditions ).should eq expected.strip!
+      expect(@auery.to_sparql(conditions)).to eq(expected.strip!)
     end
 
     context 'can be inject complex aggregation conditions' do
@@ -255,17 +257,17 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-        @query.to_sparql( conditions ).should eq expected.strip!
+        expect(@query.to_sparql(conditions)).to eq(expected.strip!)
       end
 
-      it 'can execute to DBpedia.org' do
-        pending unless request_remote
-        expected_var_name = /count_subject/
-        expected_count = /1/
-        result = JSON.parse( @query.exec_sparql( conditions ) ).to_s
-        expect( result ).to match( expected_var_name )
-        expect( result ).to match( expected_count )
-      end
+      # it 'can execute to DBpedia.org' do
+      #   pending unless request_remote
+      #   expected_var_name = /count_subject/
+      #   expected_count = /1/
+      #   result = JSON.parse(@query.exec_sparql(conditions)).to_s
+      #   expect(result).to match(expected_var_name)
+      #   expect(result).to match(expected_count)
+      # end
     end
   end
 
@@ -289,7 +291,7 @@ WHERE {
 GROUP BY ?affiliation
 LIMIT 1000
 EOQ
-        query.to_sparql( conditions ).should eq expected.strip!
+        expect(query.to_sparql(conditions)).to eq(expected.strip!)
       end
     end
   end
@@ -314,7 +316,7 @@ WHERE {
 ORDER BY ?age
 LIMIT 1000
 EOQ
-        query.to_sparql( conditions ).should eq expected.strip!
+        expect(query.to_sparql(conditions)).to eq(expected.strip!)
       end
     end
 
@@ -334,7 +336,7 @@ WHERE {
 ORDER BY DESC(?age)
 LIMIT 1000
 EOQ
-        query.to_sparql( conditions ).should eq expected.strip!
+        expect(query.to_sparql(conditions)).to eq(expected.strip!)
       end
     end
   end

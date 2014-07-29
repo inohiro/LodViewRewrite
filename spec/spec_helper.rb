@@ -1,7 +1,7 @@
 # coding: utf-8
 
 require 'rspec'
-require 'rspec/autorun'
+# require 'rspec/autorun'
 
 # require 'LodViewRewrite'
 # require '../lib/LodViewRewrite.rb'
