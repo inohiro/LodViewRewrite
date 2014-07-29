@@ -5,7 +5,7 @@ module LodViewRewrite
 
     attr_reader :filters, :select, :groupby, :orderby
 
-    def initialize( json = '', response_format = :js )
+    def initialize(json = '', response_format = :js)
       unless json == ''
         @json = json
         @loaded = ''
@@ -13,13 +13,13 @@ module LodViewRewrite
         @select = ''
         @groupby = ''
         @orderby = ''
-        @response_format = Utility.set_response_format( response_format )
+        @response_format = Utility.set_response_format(response_format)
         parse
       end
     end
 
     def parse
-      @loaded = JSON.load( @json )
+      @loaded = JSON.load(@json)
       build_conditions
     end
 
@@ -32,7 +32,7 @@ module LodViewRewrite
     #   (0: Regex, 1: Exists, 2: NotExists,) 3: Normal
     #
     # SelectionType:
-    #   0: Single, 1: Multiple, 2: All
+    #   0: Single, 1: Multiple, 2: All (*)
     #
     # Selection:
     #  ex1) [{"Left"=>"names", "Right"=>"inohiro", "Operator"=>"=", "FilterType"=>3}]
@@ -62,7 +62,7 @@ module LodViewRewrite
     #    => "SELECT (AVG(?age) AS ?avg_age) WHERE { ... FILTER( ?name, "inohiro" ) }"
     #
 
-    def build_filter_from_condition( condition = [] )
+    def build_filter_from_condition(condition = [])
       filter = "filter "
 
       case condition['FilterType']
@@ -96,12 +96,12 @@ module LodViewRewrite
       if @loaded.class == Array
         # @loaded.map { |condition| build_filter_from_condition( condition ) }
         @loaded.each do |condition|
-          if condition.key?( "FilterType" )
-            @filters << build_filter_from_condition( condition )
+          if condition.key?("FilterType")
+            @filters << build_filter_from_condition(condition)
           elsif condition.key?( "SelectionType" )
-            @select = build_select_closure_from_condition( condition )
+            @select = build_select_closure_from_condition(condition)
           elsif condition.key?( "AggregationType" )
-            @select = build_aggregation_from_condition( condition )
+            @select = build_aggregation_from_condition(condition)
           end
         end
       else
@@ -110,7 +110,7 @@ module LodViewRewrite
     end
     private :build_conditions
 
-    def build_select_closure_from_condition( condition )
+    def build_select_closure_from_condition(condition)
       select = "SELECT "
 
       case condition['SelectionType']
@@ -166,11 +166,11 @@ module LodViewRewrite
       select.strip
     end
 
-    def hatenize( variable, prefix = '' )
+    def hatenize(variable, prefix = '')
       if variable
-        chars = variable.split( // )
-        chars.unshift( prefix) if prefix != ''
-        chars.unshift( '?' ) if chars.first != '?'
+        chars = variable.split(//)
+        chars.unshift(prefix) if prefix != ''
+        chars.unshift('?') if chars.first != '?'
         chars.join
       else
         raise InvalidArgumentException

@@ -2,7 +2,7 @@
 
 module LodViewRewrite
   class Utility
-    def self.set_response_format( id )
+    def self.set_response_format(id)
       case id
       when :js || 'js'
         'application/json'

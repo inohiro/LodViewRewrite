@@ -1,24 +1,19 @@
 # coding: utf-8
 
 module LodViewRewrite
-
   class Query
 
-    attr_reader :limit
+    attr_reader :limit, :row, :structured
 
-    def initialize( sparql = '', response_format = :js, limit = 1000 )
+
+    def initialize(sparql = '', response_format = :js, limit = 1000)
       @raw = sparql
       @http = Net::HTTP::Persistent.new
       @structured = Hash.new
       @limit = limit
-      @response_format = Utility.set_response_format( response_format )
-      unless sparql == ''
-        @structured = parse
-      end
+      @response_format = Utility.set_response_format(response_format)
+      @structured = parse unless sparql == ''
     end
-
-    attr_reader :row, :structured
-    # attr_accessor :filters
 
     def prefixes; @structured['prefixes'] || []; end
     def options; @structured['options'] || []; end
@@ -27,7 +22,7 @@ module LodViewRewrite
     # def filters; @structured['filters']; end
 
     def parse
-      parsed = SPARQL.parse( @raw )
+      parsed = SPARQL.parse(@raw)
       prefixes_enable = false
 
       if parsed.is_a? RDF::Query
@@ -43,57 +38,57 @@ module LodViewRewrite
       end
 
       if prefixes_enable
-        parse_prefixes( parsed.operands[0] )
-        @structured = parse_tree( parsed.operands[1] )
+        parse_prefixes(parsed.operands[0])
+        @structured = parse_tree(parsed.operands[1])
       else
-        @structured = parse_tree( parsed )
+        @structured = parse_tree(parsed)
       end
 
       @structured
     end
     private :parse
 
-    def parse_prefixes( prefixes )
+    def parse_prefixes(prefixes)
       prefix_h = {}
-      prefixes.each { |prefix| prefix_h.store( prefix[0].to_s, prefix[1].to_s ) }
-      @structured.store( 'prefixes', prefix_h )
+      prefixes.each { |prefix| prefix_h.store(prefix[0].to_s, prefix[1].to_s) }
+      @structured.store('prefixes', prefix_h)
     end
     private :parse_prefixes
 
-    def parse_operator( tree )
+    def parse_operator(tree)
       operators = Hash.new
       operators = @structured['operators'] if @structured.key? 'operators'
 
       case tree
       when SPARQL::Algebra::Operator::Project
-        operators.store( 'select', tree.operands[0].map(&:to_s))
+        operators.store('select', tree.operands[0].map(&:to_s))
       else
         raise UnsupportedOperatorException, "#{tree}"
       end
 
-      @structured.store( 'operators', operators )
+      @structured.store('operators', operators)
     end
     private :parse_operator
 
-    def parse_patterns( patterns )
-      @structured.store( 'patterns', patterns.map(&:to_s) )
+    def parse_patterns(patterns)
+      @structured.store('patterns', patterns.map(&:to_s))
     end
     private :parse_patterns
 
-    def parse_options( options )
+    def parse_options(options)
       hash = {}
-      options.each { |key,value| hash.store( key.to_s, value.to_s ) }
-      @structured.store( 'options', hash )
+      options.each { |key,value| hash.store(key.to_s, value.to_s) }
+      @structured.store('options', hash)
     end
     private :parse_options
 
-    def parse_tree( tree )
+    def parse_tree(tree)
       if tree.kind_of? SPARQL::Algebra::Operator
-        parse_operator( tree )
-        parse_tree( tree.operands[1] )
+        parse_operator(tree)
+        parse_tree(tree.operands[1])
       elsif tree.kind_of? RDF::Query
-        parse_options( tree.options )
-        parse_patterns( tree.patterns )
+        parse_options(tree.options)
+        parse_patterns(tree.patterns)
       else
         raise UnknownQueryStructureException, 'Query tree has something that is not Operator or Query'
       end
@@ -108,7 +103,7 @@ module LodViewRewrite
 
     # filter, projection
 
-    def to_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
+    def to_sparql(condition = LodViewRewrite::Condition.new([].to_json))
       # operators, options, patterns, prefixes, and filters
       sparql = ""
 
@@ -160,7 +155,7 @@ module LodViewRewrite
       sparql
     end
 
-    def exec_sparql( condition = LodViewRewrite::Condition.new( [].to_json ) )
+    def exec_sparql(condition = LodViewRewrite::Condition.new( [].to_json ))
       # uri = URI "http://dbpedia.org/sparql" # !!
       # uri = URI "http://192.168.11.9:3030/data10000/sparql"
       uri = URI "http://192.168.11.9:3030/bsbm/sparql"
@@ -168,7 +163,7 @@ module LodViewRewrite
       # About request format
       # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
 
-      sparql = to_sparql( condition )
+      sparql = to_sparql(condition)
       params = {
         # 'default-uri-graph' => ''  # "http://dbpedia.org", # !!
         'query' => sparql,
@@ -179,7 +174,7 @@ module LodViewRewrite
 
       # response = RestClient.get( uri, :params => params )
 
-      uri.query = URI.encode_www_form( params )
+      uri.query = URI.encode_www_form(params)
       response = @http.request uri
 
       case response
