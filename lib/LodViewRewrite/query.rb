@@ -50,7 +50,7 @@ module LodViewRewrite
 
     def parse_prefixes(prefixes)
       prefix_h = {}
-      prefixes.each { |prefix| prefix_h.store(prefix[0].to_s, prefix[1].to_s) }
+      prefixes.each { |prefix| prefix_h.store(prefix[0].to_s.gsub(/:/,''), prefix[1].to_s) }
       @structured.store('prefixes', prefix_h)
     end
     private :parse_prefixes

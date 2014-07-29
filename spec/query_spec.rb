@@ -142,7 +142,7 @@ EOQ
     end
 
     it 'can access to patterns' do
-      expect(@query.patterns).not_to be_em
+      expect(@query.patterns).not_to be_empty
       expect(@query.patterns.count).to eq(1)
       expect(@query.patterns.first).to eq("?subject <http://dbpedia.org/property/prefecture> <http://dbpedia.org/resource/Tokyo> .")
     end
@@ -160,7 +160,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      expect(@auery.to_sparql).to eq(expected.strip!)
+      expect(@query.to_sparql).to eq(expected.strip!)
     end
 
     it 'can be injected FILTER condition' do
@@ -238,7 +238,7 @@ WHERE {
 }
 LIMIT 1000
 EOQ
-      expect(@auery.to_sparql(conditions)).to eq(expected.strip!)
+      expect(@query.to_sparql(conditions)).to eq(expected.strip!)
     end
 
     context 'can be inject complex aggregation conditions' do
