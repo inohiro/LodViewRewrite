@@ -41,13 +41,11 @@ EOQ
       @query = LodViewRewrite::Query.new( sparql, :tsv )
     end
 
-    # it 'response will be tsv' do
-    #   pending 'query will timeout'
-    #   # pending unless request_remote
-    #   header = @query.exec_sparql.split( "\n" ).first
-    #   header.should eq "\"subject\""
-    # end
-
+    it 'response will be tsv' do
+      pending unless request_remote
+      header = @query.exec_sparql.split( "\n" ).first
+      expect(header).to eq("\"subject\"")
+    end
   end
 
   context 'when simple query without conditions' do
@@ -216,11 +214,11 @@ EOQ
         expect(@query.to_sparql(conditions)).to eq(expected.strip!)
       end
 
-      # it 'can execute sparql to dbpedia.org' do
-      #   pending unless request_remote
-      #   expected = /42/
-      #   expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
-      # end
+      it 'can execute sparql to dbpedia.org' do
+        pending unless request_remote
+        expected = /42/
+        expect( JSON.parse( @query.exec_sparql( conditions ) ).to_s ).to match( expected )
+      end
     end
 
     it 'can be injected complex conditions' do
@@ -260,14 +258,14 @@ EOQ
         expect(@query.to_sparql(conditions)).to eq(expected.strip!)
       end
 
-      # it 'can execute to DBpedia.org' do
-      #   pending unless request_remote
-      #   expected_var_name = /count_subject/
-      #   expected_count = /1/
-      #   result = JSON.parse(@query.exec_sparql(conditions)).to_s
-      #   expect(result).to match(expected_var_name)
-      #   expect(result).to match(expected_count)
-      # end
+      it 'can execute to DBpedia.org' do
+        pending unless request_remote
+        expected_var_name = /count_subject/
+        expected_count = /1/
+        result = JSON.parse(@query.exec_sparql(conditions)).to_s
+        expect(result).to match(expected_var_name)
+        expect(result).to match(expected_count)
+      end
     end
   end
 

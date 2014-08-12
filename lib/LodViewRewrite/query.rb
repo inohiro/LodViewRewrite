@@ -156,9 +156,9 @@ module LodViewRewrite
     end
 
     def exec_sparql(condition = LodViewRewrite::Condition.new( [].to_json ))
-      # uri = URI "http://dbpedia.org/sparql" # !!
+      uri = URI "http://dbpedia.org/sparql" # !!
       # uri = URI "http://192.168.11.9:3030/data10000/sparql"
-      uri = URI "http://192.168.11.9:3030/bsbm/sparql"
+      # uri = URI "http://192.168.11.9:3030/bsbm/sparql"
 
       # About request format
       # http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol
